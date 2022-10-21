@@ -2,6 +2,7 @@ package carta
 
 import (
 	"database/sql"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -15,14 +16,11 @@ type column struct {
 }
 
 func allocateColumns(m *Mapper, columns map[string]column) error {
-	var (
-		candidates map[string]bool
-	)
 	presentColumns := map[string]column{}
 	for cName, c := range columns {
 		if m.IsBasic {
-			candidates = getColumnNameCandidates("", m.AncestorNames)
-			if _, ok := candidates[cName]; ok {
+			candidate := getSingleColumnNameCandidate("", m.AncestorNames)
+			if cName == candidate {
 				presentColumns[cName] = column{
 					typ:         c.typ,
 					name:        cName,
@@ -32,17 +30,21 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 			}
 		} else {
 			for i, field := range m.Fields {
-				candidates = getColumnNameCandidates(field.Name, m.AncestorNames)
 				// can only allocate columns to basic fields
-				if isBasicType(field.Typ) {
-					if _, ok := candidates[cName]; ok {
+				if !field.IsMapped && isBasicType(field.Typ) {
+					field := m.Fields[i]
+					candidate := getSingleColumnNameCandidate(field.Name, m.AncestorNames)
+					// litter.Dump(cName, candidate)
+					if cName == candidate {
 						presentColumns[cName] = column{
 							typ:         c.typ,
 							name:        cName,
 							columnIndex: c.columnIndex,
 							i:           i,
 						}
+						field.IsMapped = true
 						delete(columns, cName) // dealocate claimed column
+						break
 					}
 				}
 			}
@@ -71,6 +73,24 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 			return err
 		}
 	}
+
+	/**********************************************************************
+	 * if not all columns could be mapped to a field, then return
+	 * an error with all the fieldnames.
+	**********************************************************************/
+	if len(columns) > 0 {
+		missingColumns := ""
+		i := 0
+		for id := range columns {
+			if i > 0 {
+				missingColumns += ", "
+			}
+			missingColumns += id
+			i++
+		}
+		return fmt.Errorf("not all columns could be mapped: %s", missingColumns)
+	}
+
 	return nil
 }
 
@@ -97,6 +117,18 @@ func getColumnNameCandidates(fieldName string, ancestorNames []string) map[strin
 		candidates[toSnakeCase(nameConcat)] = true
 	}
 	return candidates
+}
+
+func getSingleColumnNameCandidate(fieldName string, ancestorNames []string) string {
+	for i := len(ancestorNames) - 1; i >= 0; i-- {
+		if fieldName == "" {
+			return ancestorNames[i]
+		} else {
+			return strings.ToLower(ancestorNames[i]) + "." + strings.ToLower(fieldName)
+		}
+	}
+
+	return ""
 }
 
 func toSnakeCase(s string) string {

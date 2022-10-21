@@ -13,7 +13,7 @@ func setDst(m *Mapper, dst reflect.Value, rsv *resolver) error {
 	for _, uid := range rsv.elementOrder {
 		elem := rsv.elements[uid]
 
-		//set childeren first
+		// set childeren first
 		for fieldIndex, subMapRsv := range elem.subMaps {
 			var (
 				subMap       *Mapper
