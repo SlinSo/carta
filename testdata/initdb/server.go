@@ -79,7 +79,6 @@ func (m *InitServiceMapServer) InsertPost(ctx context.Context, r *InsertPostRequ
 		return nil, status.Error(codes.InvalidArgument, "error: executing query")
 	}
 	return &EmptyResponse{}, nil
-
 }
 
 func (m *InitServiceMapServer) InsertPostTag(ctx context.Context, r *InsertPostTagRequest) (*EmptyResponse, error) {
@@ -93,7 +92,6 @@ func (m *InitServiceMapServer) InsertPostTag(ctx context.Context, r *InsertPostT
 		return nil, status.Error(codes.InvalidArgument, "error: executing query")
 	}
 	return &EmptyResponse{}, nil
-
 }
 
 func (m *InitServiceMapServer) InsertTag(ctx context.Context, r *InsertTagRequest) (*EmptyResponse, error) {
