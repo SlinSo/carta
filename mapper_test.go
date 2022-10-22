@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackskj/carta"
-	td "github.com/jackskj/carta/testdata"
-	"github.com/jackskj/carta/testdata/initdb"
+	"github.com/seambiz/carta"
+	td "github.com/seambiz/carta/testdata"
+	"github.com/seambiz/carta/testdata/initdb"
 	diff "github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
 	"google.golang.org/grpc"
@@ -93,7 +93,7 @@ func TestMain(m *testing.M) {
 
 func createDatabase(dbs map[string]*sql.DB) {
 	requests = td.GenerateRequests()
-	for dbName, _ := range dbs {
+	for dbName := range dbs {
 		meta := &initdb.Meta{Db: dbName}
 		initService := initdb.NewInitServiceClient(conn)
 		initService.InitDB(ctx, &initdb.InitRequest{Meta: &initdb.Meta{Db: dbName}})
@@ -138,7 +138,7 @@ func createDatabase(dbs map[string]*sql.DB) {
 
 func updateGoldenFile(goldenFile string) {
 	jsonResult := generateResultBytes()
-	if err := ioutil.WriteFile(goldenFile, jsonResult, 0644); err != nil {
+	if err := ioutil.WriteFile(goldenFile, jsonResult, 0o644); err != nil {
 		log.Fatalln(err)
 	}
 }

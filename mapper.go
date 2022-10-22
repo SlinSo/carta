@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jackskj/carta/value"
+	"github.com/seambiz/carta/value"
 )
 
 const (

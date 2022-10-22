@@ -1,4 +1,4 @@
-module github.com/jackskj/carta
+module github.com/seambiz/carta
 
 go 1.18
 
