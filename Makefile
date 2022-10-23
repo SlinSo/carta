@@ -14,9 +14,9 @@ CP := cp -u -v
 SHELL=/usr/bin/env sh
 
 # github.com/jessfraz/junk/sembump download to gopath externally
-.PHONY: bump
+.PHONY: release
 BUMP := patch
-bump:
+release:
 	@echo "(${BUMP})ing"
 
 	$(eval VERSION_FILE := version.txt)
