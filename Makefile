@@ -27,5 +27,5 @@ bump:
 	@echo $(NEW_VERSION) > ${VERSION_FILE}
 	git add ${VERSION_FILE}
 	git commit -vsam "bump 'carta' version to $(NEW_VERSION)"
-	git tag -a $(NEW_VERSION)
+	git tag -a $(NEW_VERSION) -m "$(NEW_VERSION)"
 	git push origin $(NEW_VERSION)
