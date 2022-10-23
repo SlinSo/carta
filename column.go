@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/seambiz/strcase"
 )
 
 // column represents the ith struct field of this mapper where the column is to be mapped
@@ -82,7 +84,17 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 			missingColumns += id
 			i++
 		}
-		return fmt.Errorf("not all columns could be mapped: %s", missingColumns)
+
+		candidates := []string{}
+		for i, field := range m.Fields {
+			if !field.IsMapped && isBasicType(field.Typ) {
+				field := m.Fields[i]
+				candidate := getSingleColumnNameCandidate(field.Name, m.AncestorName)
+				candidates = append(candidates, candidate)
+			}
+		}
+
+		return fmt.Errorf("not all columns could be mapped: \ncolumns: %s\nunmapped fields: %s", missingColumns, strings.Join(candidates, ","))
 	}
 
 	return nil
@@ -92,8 +104,8 @@ func getSingleColumnNameCandidate(fieldName string, ancestorName string) string 
 	if fieldName == "" {
 		return ancestorName
 	} else if ancestorName == "" {
-		return strings.ToLower(fieldName)
+		return strcase.ToSnake(fieldName)
 	}
 
-	return strings.ToLower(ancestorName) + "." + strings.ToLower(fieldName)
+	return strings.ToLower(ancestorName) + "." + strcase.ToSnake(fieldName)
 }

@@ -37,6 +37,7 @@ require (
 	github.com/onsi/gomega v1.22.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/sanity-io/litter v1.5.5 // indirect
+	github.com/seambiz/strcase v0.2.1 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
