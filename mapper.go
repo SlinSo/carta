@@ -143,6 +143,24 @@ func Map(rows *sql.Rows, dst interface{}) error {
 			return err
 		}
 
+		/**********************************************************************
+		 * if not all columns could be mapped to a field, then return
+		 * an error with all the fieldnames.
+		**********************************************************************/
+		if len(columnsByName) > 0 {
+			missingColumns := ""
+			i := 0
+			for id := range columnsByName {
+				if i > 0 {
+					missingColumns += ", "
+				}
+				missingColumns += id
+				i++
+			}
+
+			return fmt.Errorf("not all columns could be mapped: \ncolumns: %s", missingColumns)
+		}
+
 		mapperCache.storeMap(columns, dstTyp, mapper)
 
 	}
@@ -243,10 +261,11 @@ func determineFieldsNames(m *Mapper) error {
 		return nil
 	}
 
+	vp := reflect.New(m.Typ)
+	v := reflect.Indirect(vp)
 	for i := 0; i < m.Typ.NumField(); i++ {
 		field := m.Typ.Field(i)
-		if isExported(field) {
-			// TODO Naming
+		if v.FieldByName(field.Name).CanSet() {
 			if tag := nameFromTag(field.Tag); tag != "" {
 				name = tag
 			} else {

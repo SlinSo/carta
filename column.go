@@ -2,7 +2,6 @@ package carta
 
 import (
 	"database/sql"
-	"fmt"
 	"sort"
 	"strings"
 
@@ -68,33 +67,6 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 		if err := allocateColumns(subMap, columns); err != nil {
 			return err
 		}
-	}
-
-	/**********************************************************************
-	 * if not all columns could be mapped to a field, then return
-	 * an error with all the fieldnames.
-	**********************************************************************/
-	if len(columns) > 0 {
-		missingColumns := ""
-		i := 0
-		for id := range columns {
-			if i > 0 {
-				missingColumns += ", "
-			}
-			missingColumns += id
-			i++
-		}
-
-		candidates := []string{}
-		for i, field := range m.Fields {
-			if !field.IsMapped && isBasicType(field.Typ) {
-				field := m.Fields[i]
-				candidate := getSingleColumnNameCandidate(field.Name, m.AncestorName)
-				candidates = append(candidates, candidate)
-			}
-		}
-
-		return fmt.Errorf("not all columns could be mapped: \ncolumns: %s\nunmapped fields: %s", missingColumns, strings.Join(candidates, ","))
 	}
 
 	return nil
