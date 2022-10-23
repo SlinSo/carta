@@ -8,25 +8,14 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
-	"net"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/seambiz/carta"
 	td "github.com/seambiz/carta/testdata"
-	"github.com/seambiz/carta/testdata/initdb"
 	diff "github.com/yudai/gojsondiff"
 	"github.com/yudai/gojsondiff/formatter"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/test/bufconn"
 	// "github.com/golang/protobuf/proto"
-)
-
-const (
-	bufSize = 1024 * 1024
-	pg      = "postgres"
-	mysql   = "mysql"
 )
 
 var (
@@ -34,41 +23,25 @@ var (
 	initDB = true
 )
 
-var (
-	conn        *grpc.ClientConn
-	ctx         context.Context
-	dbs         map[string]*sql.DB
-	grpcServer  *grpc.Server
-	lis         *bufconn.Listener
-	requests    *td.Requests
-	testResults map[string]interface{}
-)
+var ctx context.Context
+
+// DBConnection is the connection string to use for testing
+const dsnURI = "file:test1?mode=memory&cache=shared"
+
+// NewMigratedDB returns a new connection to a migrated database
+func NewMigratedDB(provider string, connection string, models ...interface{}) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", dsnURI)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
 
 // Generate test data before running tests
 // Start local server with bufconn
 func setup() {
-	testResults = make(map[string]interface{})
 	ctx = context.Background()
-	lis = bufconn.Listen(bufSize)
-	grpcServer = grpc.NewServer()
-	dbs = map[string]*sql.DB{
-		pg:    td.GetPG(),
-		mysql: td.GetMySql(),
-	}
-	initdb.RegisterInitServiceServer(grpcServer, &initdb.InitServiceMapServer{DBs: dbs})
-	go func() {
-		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("Server exited with error: %v", err)
-		}
-	}()
-	if connection, err := grpc.DialContext(ctx, "bufnet", grpc.WithDialer(bufDialer), grpc.WithInsecure()); err != nil {
-		log.Fatalf("bufnet dial fail: %v", err)
-	} else {
-		conn = connection
-	}
-	if initDB {
-		createDatabase(dbs)
-	}
 }
 
 func TestMain(m *testing.M) {
@@ -87,52 +60,18 @@ func TestMain(m *testing.M) {
 		// compare existing results
 		compareResults(goldenFile)
 	}
-	teardown()
 	os.Exit(code)
 }
 
-func createDatabase(dbs map[string]*sql.DB) {
-	requests = td.GenerateRequests()
-	for dbName := range dbs {
-		meta := &initdb.Meta{Db: dbName}
-		initService := initdb.NewInitServiceClient(conn)
-		initService.InitDB(ctx, &initdb.InitRequest{Meta: &initdb.Meta{Db: dbName}})
-		for i := 0; i < len(requests.InsertAuthorRequests); i++ {
-			requests.InsertAuthorRequests[i].Meta = meta
-			if _, err := initService.InsertAuthor(ctx, requests.InsertAuthorRequests[i]); err != nil {
-				log.Fatalf("InsertAuthor: %s", err)
-			}
-		}
-		for i := 0; i < len(requests.InsertBlogRequests); i++ {
-			requests.InsertBlogRequests[i].Meta = meta
-			if _, err := initService.InsertBlog(ctx, requests.InsertBlogRequests[i]); err != nil {
-				log.Fatalf("InsertBlog: %s", err)
-			}
-		}
-		for i := 0; i < len(requests.InsertCommentRequests); i++ {
-			requests.InsertCommentRequests[i].Meta = meta
-			if _, err := initService.InsertComment(ctx, requests.InsertCommentRequests[i]); err != nil {
-				log.Fatalf("InsertComment: %s", err)
-			}
-		}
-		for i := 0; i < len(requests.InsertPostRequests); i++ {
-			requests.InsertPostRequests[i].Meta = meta
-			if _, err := initService.InsertPost(ctx, requests.InsertPostRequests[i]); err != nil {
-				log.Fatalf("InsertPost: %s", err)
-			}
-		}
-		for i := 0; i < len(requests.InsertPostTagRequests); i++ {
-			requests.InsertPostTagRequests[i].Meta = meta
-			if _, err := initService.InsertPostTag(ctx, requests.InsertPostTagRequests[i]); err != nil {
-				log.Fatalf("InsertPostTag: %s", err)
-			}
-		}
-		for i := 0; i < len(requests.InsertTagRequests); i++ {
-			requests.InsertTagRequests[i].Meta = meta
-			if _, err := initService.InsertTag(ctx, requests.InsertTagRequests[i]); err != nil {
-				log.Fatalf("InsertTag: %s", err)
-			}
-		}
+func createDatabase(conn *sql.DB) {
+	dump, err := os.ReadFile("testdata/sql/dump.sql")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = conn.Exec(string(dump))
+	if err != nil {
+		panic(err)
 	}
 }
 
@@ -173,14 +112,6 @@ func generateResultBytes() []byte {
 		jsonResult = r
 	}
 	return jsonResult
-}
-
-func teardown() {
-	defer conn.Close()
-}
-
-func bufDialer(string, time.Duration) (net.Conn, error) {
-	return lis.Dial()
 }
 
 func query(rawSql string) map[string]*sql.Rows {

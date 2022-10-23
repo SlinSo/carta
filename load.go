@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/seambiz/carta/value"
 	"github.com/valyala/bytebufferpool"
@@ -19,6 +20,8 @@ func (m *Mapper) loadRows(rows *sql.Rows, colTyps []*sql.ColumnType) (*resolver,
 		colTypNames[i] = colTyps[i].DatabaseTypeName()
 	}
 	rsv := newResolver()
+
+	rownum := 0
 	for rows.Next() {
 		for i := 0; i < len(colTyps); i++ {
 			row[i] = value.NewCell(colTypNames[i])
@@ -26,9 +29,10 @@ func (m *Mapper) loadRows(rows *sql.Rows, colTyps []*sql.ColumnType) (*resolver,
 		if err = rows.Scan(row...); err != nil {
 			return nil, err
 		}
-		if err = loadRow(m, row, rsv); err != nil {
+		if err = loadRow(m, row, rsv, rownum); err != nil {
 			return nil, err
 		}
+		rownum++
 	}
 	return rsv, nil
 }
@@ -54,7 +58,7 @@ func (m *Mapper) loadRows(rows *sql.Rows, colTyps []*sql.ColumnType) (*resolver,
 //	for example, if a blog has many Authors
 //
 // rows are actually []*Cell, theu are passed here as interface since sql scan requires []interface{}
-func loadRow(m *Mapper, row []interface{}, rsv *resolver) error {
+func loadRow(m *Mapper, row []interface{}, rsv *resolver, rownum int) error {
 	var (
 		err      error
 		dstField reflect.Value // destination field to be set with
@@ -63,7 +67,14 @@ func loadRow(m *Mapper, row []interface{}, rsv *resolver) error {
 		found    bool
 	)
 
-	uid := getUniqueId(row, m)
+	var uid uniqueValId
+	if m.Crd != Collection { // i am not sure if this really is the solution
+		uid = ""
+	} else if len(m.PresentColumns) == 0 {
+		uid = uniqueValId(strconv.Itoa(rownum))
+	} else {
+		uid = getUniqueId(row, m)
+	}
 
 	if elem, found = rsv.elements[uid]; !found {
 		// unique row mapping found, new object
@@ -211,7 +222,7 @@ func loadRow(m *Mapper, row []interface{}, rsv *resolver) error {
 	}
 
 	for i, subMap := range m.SubMaps {
-		if err = loadRow(subMap, row, elem.subMaps[i]); err != nil {
+		if err = loadRow(subMap, row, elem.subMaps[i], rownum); err != nil {
 			return err
 		}
 	}

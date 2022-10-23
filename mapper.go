@@ -39,7 +39,8 @@ type Field struct {
 }
 
 type Mapper struct {
-	Crd Cardinality //
+	Name string
+	Crd  Cardinality //
 
 	IsListPtr bool // true if destination is *[], false if destination is [], used only if cardinality is a collection
 
@@ -78,8 +79,8 @@ type Mapper struct {
 	// the following querry would correctly map if we were mapping to *[]Manager
 	// "select id, employees_id from employees join managers"
 	// employees_ is the prefix of the parent (lower case of the parent with "_")
-	Fields        map[fieldIndex]*Field
-	AncestorNames []string // Field.Name of ancestors
+	Fields       map[fieldIndex]*Field
+	AncestorName string // Field.Name of ancestors
 
 	// Nested structs which correspond to any has-one has-many relationships
 	// int is the ith element of this struct where the submap exists
@@ -204,6 +205,7 @@ func newMapper(t reflect.Type) (*Mapper, error) {
 		Typ:       elemTyp,
 		Kind:      elemTyp.Kind(),
 		IsTypePtr: isTypePtr,
+		Name:      elemTyp.Name(),
 	}
 	if subMaps, err = findSubMaps(mapper.Typ); err != nil {
 		return nil, err

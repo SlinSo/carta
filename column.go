@@ -19,7 +19,7 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 	presentColumns := map[string]column{}
 	for cName, c := range columns {
 		if m.IsBasic {
-			candidate := getSingleColumnNameCandidate("", m.AncestorNames)
+			candidate := getSingleColumnNameCandidate("", m.AncestorName)
 			if cName == candidate {
 				presentColumns[cName] = column{
 					typ:         c.typ,
@@ -33,8 +33,7 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 				// can only allocate columns to basic fields
 				if !field.IsMapped && isBasicType(field.Typ) {
 					field := m.Fields[i]
-					candidate := getSingleColumnNameCandidate(field.Name, m.AncestorNames)
-					// litter.Dump(cName, candidate)
+					candidate := getSingleColumnNameCandidate(field.Name, m.AncestorName)
 					if cName == candidate {
 						presentColumns[cName] = column{
 							typ:         c.typ,
@@ -62,13 +61,8 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 	sort.Ints(columnIds)
 	m.SortedColumnIndexes = columnIds
 
-	ancestorNames := []string{}
-	if len(m.AncestorNames) != 0 {
-		ancestorNames = m.AncestorNames
-	}
-
 	for i, subMap := range m.SubMaps {
-		subMap.AncestorNames = append(ancestorNames, m.Fields[i].Name)
+		subMap.AncestorName = m.Fields[i].Name
 		if err := allocateColumns(subMap, columns); err != nil {
 			return err
 		}
@@ -94,7 +88,7 @@ func allocateColumns(m *Mapper, columns map[string]column) error {
 	return nil
 }
 
-func getColumnNameCandidates(fieldName string, ancestorNames []string) map[string]bool {
+func getColumnNameCandidates(fieldName string, ancestorName string) map[string]bool {
 	// empty field name means that the mapper is basic, since there is no struct assiciated with this slice, there is no field name
 	candidates := map[string]bool{}
 	if fieldName != "" {
@@ -102,30 +96,27 @@ func getColumnNameCandidates(fieldName string, ancestorNames []string) map[strin
 		candidates[toSnakeCase(fieldName)] = true
 		candidates[strings.ToLower(fieldName)] = true
 	}
-	if len(ancestorNames) == 0 {
+	if ancestorName == "" {
 		return candidates
 	}
 	nameConcat := fieldName
-	for i := len(ancestorNames) - 1; i >= 0; i-- {
-		if nameConcat == "" {
-			nameConcat = ancestorNames[i]
-		} else {
-			nameConcat = ancestorNames[i] + "_" + nameConcat
-		}
-		candidates[nameConcat] = true
-		candidates[strings.ToLower(nameConcat)] = true
-		candidates[toSnakeCase(nameConcat)] = true
+
+	if nameConcat == "" {
+		nameConcat = ancestorName
+	} else {
+		nameConcat = ancestorName + "." + nameConcat
 	}
+	candidates[nameConcat] = true
+	candidates[strings.ToLower(nameConcat)] = true
+	candidates[toSnakeCase(nameConcat)] = true
 	return candidates
 }
 
-func getSingleColumnNameCandidate(fieldName string, ancestorNames []string) string {
-	for i := len(ancestorNames) - 1; i >= 0; i-- {
-		if fieldName == "" {
-			return ancestorNames[i]
-		} else {
-			return strings.ToLower(ancestorNames[i]) + "." + strings.ToLower(fieldName)
-		}
+func getSingleColumnNameCandidate(fieldName string, ancestorName string) string {
+	if fieldName == "" {
+		return ancestorName
+	} else {
+		return strings.ToLower(ancestorName) + "." + strings.ToLower(fieldName)
 	}
 
 	return ""
