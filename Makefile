@@ -1,28 +1,31 @@
-PROTO_DIRS= "testdata/initdb" 
-DBS= "mapper" "plugin" "templates"
+# go option
+GO        ?= go
+TAGS      :=
+TESTS     := .
+TESTFLAGS :=
+LDFLAGS   := #-w -s
+GOFLAGS   :=
+BINDIR    := $(CURDIR)/bin
 
-testdbs:
-	docker run --name carta-postgres-test --env POSTGRES_HOST_AUTH_METHOD=trust -d  -p 5432:5432 postgres
-	docker run --name carta-mysql-test -d  --env MYSQL_ALLOW_EMPTY_PASSWORD=yes --env MYSQL_DATABASE=mysql -p 3306:3306 mysql
+# tools
+CP := cp -u -v
 
-gen:
-	go install .
-	for i in $(PROTO_DIRS); do \
-		protoc 	--go_out="plugins=grpc:$(GOPATH)/src"   \
-			-I=. \
-			$$i/*.proto ; \
-	done
+# Required for globs to work correctly
+SHELL=/usr/bin/env sh
 
+# github.com/jessfraz/junk/sembump download to gopath externally
+.PHONY: bump
+BUMP := patch
+bump:
+	@echo "(${BUMP})ing"
 
-install:
-	# generating map binary in $$GOPATH/bin
-	go install .
+	$(eval VERSION_FILE := version.txt)
+	$(eval VERSION := $(shell cat ${VERSION_FILE}))
+	$(eval NEW_VERSION = $(shell sembump --kind $(BUMP) $(VERSION)))
 
-test:
-	go test -v
-
-testu:
-	go test -v --update
-
-
-.PHONY: gen install testdbs test testu
+	@echo "Bumping version.txt from $(VERSION) to $(NEW_VERSION)"
+	@echo $(NEW_VERSION) > ${VERSION_FILE}
+	git add ${VERSION_FILE}
+	git commit -vsam "bump 'carta' version to $(NEW_VERSION)"
+	git tag -a $(NEW_VERSION)
+	git push origin $(NEW_VERSION)
