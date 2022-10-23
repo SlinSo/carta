@@ -19,7 +19,7 @@ import (
 
 type Cell struct {
 	kind       reflect.Kind // data type with which Cell will be instantiated
-	bits       uint64       //IEEE 754 binary representation of numeric value
+	bits       uint64       // IEEE 754 binary representation of numeric value
 	text       string       // non-numeric data as bytes for data which arrives as string or []byte
 	time       time.Time    //  any data that arrives as time, that includes timestame w/ or w/o zone
 	colTypName string       // Used for parting if some data arrices in plain text format, ex, if time arrives as string
@@ -39,6 +39,7 @@ func NewCell(colTypName string) *Cell {
 }
 
 // implements database/sql scan interface
+// mysql is always []byte or sql.RawBytes
 func (c *Cell) Scan(src interface{}) error {
 	switch src.(type) {
 	case int64:
@@ -111,6 +112,9 @@ func (c Cell) IsValid() bool {
 }
 
 func (c Cell) Bool() (bool, error) {
+	if c.kind == reflect.String {
+		return c.text == "1", nil
+	}
 	return (c.bits != 0), nil
 }
 
@@ -300,7 +304,7 @@ func (c Cell) AsInterface() (interface{}, error) {
 
 func (c Cell) Uid() string {
 	if c.IsNull() {
-		//TODO: safely represent null and bool values as string
+		// TODO: safely represent null and bool values as string
 		return "cnull"
 	} else {
 		switch c.kind {
