@@ -1,0 +1,40 @@
+{
+    "MetaLinter": "golangci-lint run ./db/mysql --presets bugs",
+    "LintPackage": "github.com/seambiz/db/mysql",
+    "GoFmtCmd": "gofumpt -w",
+    "Package": "mysql",
+    "RootPackage": "tests",
+    "RootPackageInclude": "github.com/seambiz/carta",
+    "DirOut": "./",
+    "SubPackage": "db",
+    "FilePattern": "%s.go",
+    "Schemas": [
+        {
+            "Name": "sakila",
+            "TemplateFolder": "./_files/codegen_templates/",
+            "NoTests": true,
+            "IgnoreTableNames": [
+                "company_custom_data",
+                "customer_settings",
+                "customer_has_custom_field",
+                "custom_field",
+                "custom_field_type",
+                "location_custom_data",
+                "location_delivery",
+                "location_settings",
+                "migrations",
+                "print_settings",
+                "schema_migrations",
+                "supplier_custom_data",
+                "supplier_has_custom_field",
+                "task"
+            ]
+        }
+    ],
+    "Database": {
+        "DSN": "root:k4nb4n@tcp(localhost:13306)/?parseTime=true",
+        "Schemas": [
+            "sakila"
+        ]
+    }
+}

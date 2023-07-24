@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/sanity-io/litter"
 	"github.com/seambiz/carta/value"
 )
 
@@ -87,6 +88,64 @@ type Mapper struct {
 	SubMaps map[fieldIndex]*Mapper
 }
 
+type fieldMapping struct {
+	complexType       bool // slice and struct are complex types
+	columnIndex       int  // index in ScanContext.row
+	implementsScanner bool
+}
+
+var scannerInterfaceType = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
+
+func implementsScannerType(fieldType reflect.Type) bool {
+	if fieldType.Implements(scannerInterfaceType) {
+		return true
+	}
+
+	fieldTypePtr := reflect.New(fieldType).Type()
+
+	return fieldTypePtr.Implements(scannerInterfaceType)
+}
+
+func Map2(rows *sql.Rows, dst interface{}) error {
+	// assert destination type
+	dstTyp := reflect.TypeOf(dst)
+	if !(isSlicePtr(dstTyp) || isStructPtr(dstTyp)) {
+		return fmt.Errorf("carta: cannot map rows onto %s, destination must be pointer to a slice(*[]) or pointer to a struct", dstTyp)
+	}
+
+	// just the column names for mapping
+	columns, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+	litter.Dump(columns)
+
+	// needed for generic mapping from raw bytes
+	columnTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return err
+	}
+	litter.Dump(columnTypes)
+
+	// TODO: Caching
+
+	// map alias to column index
+	columnsByName := map[string]int{}
+	for i, alias := range columns {
+		nameParts := strings.SplitN(alias, ".", 2)
+		identifier := strings.ToLower(nameParts[0])
+
+		if len(nameParts) > 1 {
+			identifier = identifier + "." + strings.ToLower(nameParts[1])
+		}
+
+		columnsByName[identifier] = i
+	}
+	litter.Dump(columnsByName)
+
+	return nil
+}
+
 // Maps db rows onto the complex struct,
 // Response must be a struct, pointer to a struct for our response, a slice of structs or slice of pointers to a struct
 func Map(rows *sql.Rows, dst interface{}) error {
@@ -116,11 +175,13 @@ func Map(rows *sql.Rows, dst interface{}) error {
 		if mapper, err = newMapper(dstTyp); err != nil {
 			return err
 		}
+		// log.Println("mapper", mapper)
 
 		// determine field names
 		if err = determineFieldsNames(mapper); err != nil {
 			return err
 		}
+		// log.Println("withFieldNames", mapper)
 
 		// Allocate columns
 		columnsByName := map[string]column{}
@@ -142,6 +203,7 @@ func Map(rows *sql.Rows, dst interface{}) error {
 		if err = allocateColumns(mapper, columnsByName); err != nil {
 			return err
 		}
+		// log.Println("allocateColumns", mapper)
 
 		/**********************************************************************
 		 * if not all columns could be mapped to a field, then return

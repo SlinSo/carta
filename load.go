@@ -75,6 +75,7 @@ func loadRow(m *Mapper, row []interface{}, rsv *resolver, rownum int) error {
 	} else {
 		uid = getUniqueId(row, m)
 	}
+	// log.Println("uid", uid)
 
 	if elem, found = rsv.elements[uid]; !found {
 		// unique row mapping found, new object

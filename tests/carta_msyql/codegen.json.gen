@@ -1,0 +1,1204 @@
+{
+	"MetaLinter": "golangci-lint run ./db/mysql --presets bugs",
+	"LintPackage": "github.com/seambiz/db/mysql",
+	"GoFmtCmd": "gofumpt -w",
+	"Package": "mysql",
+	"RootPackage": "tests",
+	"RootPackageInclude": "github.com/seambiz/carta",
+	"DirOut": "./",
+	"SubPackage": "db",
+	"FilePattern": "%s.go",
+	"Schemas": [
+		{
+			"Name": "sakila",
+			"IgnoreTableNames": [
+				"company_custom_data",
+				"customer_settings",
+				"customer_has_custom_field",
+				"custom_field",
+				"custom_field_type",
+				"location_custom_data",
+				"location_delivery",
+				"location_settings",
+				"migrations",
+				"print_settings",
+				"schema_migrations",
+				"supplier_custom_data",
+				"supplier_has_custom_field",
+				"task"
+			],
+			"Tables": [
+				{
+					"Name": "actor",
+					"Fields": [
+						{
+							"Name": "actor_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "first_name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_actor_last_name",
+							"Fields": [
+								"last_name"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"actor_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"Generate": true
+				},
+				{
+					"Name": "address",
+					"Fields": [
+						{
+							"Name": "address_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "address",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "address2",
+							"DBType": "varchar",
+							"IsNullable": true
+						},
+						{
+							"Name": "district",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "city_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "postal_code",
+							"DBType": "varchar",
+							"IsNullable": true
+						},
+						{
+							"Name": "phone",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "location",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_city_id",
+							"Fields": [
+								"city_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_location",
+							"Fields": [
+								"location"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"address_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_address_city",
+							"Fields": [
+								"city_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "city",
+							"RefFields": [
+								"city_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "category",
+					"Fields": [
+						{
+							"Name": "category_id",
+							"DBType": "tinyint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "primary",
+							"Fields": [
+								"category_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"Generate": true
+				},
+				{
+					"Name": "city",
+					"Fields": [
+						{
+							"Name": "city_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "city",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "country_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_country_id",
+							"Fields": [
+								"country_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"city_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_city_country",
+							"Fields": [
+								"country_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "country",
+							"RefFields": [
+								"country_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "country",
+					"Fields": [
+						{
+							"Name": "country_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "country",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "primary",
+							"Fields": [
+								"country_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"Generate": true
+				},
+				{
+					"Name": "customer",
+					"Fields": [
+						{
+							"Name": "customer_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "store_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "first_name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "email",
+							"DBType": "varchar",
+							"IsNullable": true
+						},
+						{
+							"Name": "address_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "active",
+							"DBType": "tinyint(1)"
+						},
+						{
+							"Name": "create_date",
+							"DBType": "datetime"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp",
+							"IsNullable": true
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_address_id",
+							"Fields": [
+								"address_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_store_id",
+							"Fields": [
+								"store_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_last_name",
+							"Fields": [
+								"last_name"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"customer_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_customer_address",
+							"Fields": [
+								"address_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "address",
+							"RefFields": [
+								"address_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_customer_store",
+							"Fields": [
+								"store_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "store",
+							"RefFields": [
+								"store_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "film",
+					"Fields": [
+						{
+							"Name": "film_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "title",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "description",
+							"DBType": "text",
+							"IsNullable": true
+						},
+						{
+							"Name": "release_year",
+							"DBType": "year",
+							"IsNullable": true
+						},
+						{
+							"Name": "language_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "original_language_id",
+							"DBType": "tinyint unsigned",
+							"IsNullable": true
+						},
+						{
+							"Name": "rental_duration",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "rental_rate",
+							"DBType": "decimal"
+						},
+						{
+							"Name": "length",
+							"DBType": "smallint unsigned",
+							"IsNullable": true
+						},
+						{
+							"Name": "replacement_cost",
+							"DBType": "decimal"
+						},
+						{
+							"Name": "rating",
+							"DBType": "enum",
+							"IsNullable": true,
+							"EnumValues": [
+								"G",
+								"PG",
+								"PG-13",
+								"R",
+								"NC-17"
+							]
+						},
+						{
+							"Name": "special_features",
+							"DBType": "set",
+							"IsNullable": true
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_language_id",
+							"Fields": [
+								"language_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_original_language_id",
+							"Fields": [
+								"original_language_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_title",
+							"Fields": [
+								"title"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"film_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_film_language",
+							"Fields": [
+								"language_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "language",
+							"RefFields": [
+								"language_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_film_language_original",
+							"Fields": [
+								"original_language_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "language",
+							"RefFields": [
+								"language_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "film_actor",
+					"Fields": [
+						{
+							"Name": "actor_id",
+							"DBType": "smallint unsigned",
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "film_id",
+							"DBType": "smallint unsigned",
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_film_id",
+							"Fields": [
+								"film_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"actor_id",
+								"film_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_film_actor_actor",
+							"Fields": [
+								"actor_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "actor",
+							"RefFields": [
+								"actor_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_film_actor_film",
+							"Fields": [
+								"film_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "film",
+							"RefFields": [
+								"film_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "film_category",
+					"Fields": [
+						{
+							"Name": "film_id",
+							"DBType": "smallint unsigned",
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "category_id",
+							"DBType": "tinyint unsigned",
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "fk_film_category_category",
+							"Fields": [
+								"category_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"film_id",
+								"category_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_film_category_category",
+							"Fields": [
+								"category_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "category",
+							"RefFields": [
+								"category_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_film_category_film",
+							"Fields": [
+								"film_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "film",
+							"RefFields": [
+								"film_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "film_text",
+					"Fields": [
+						{
+							"Name": "film_id",
+							"DBType": "smallint",
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "title",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "description",
+							"DBType": "text",
+							"IsNullable": true
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_title_description",
+							"Fields": [
+								"title",
+								"description"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"film_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"Generate": true
+				},
+				{
+					"Name": "inventory",
+					"Fields": [
+						{
+							"Name": "inventory_id",
+							"DBType": "mediumint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "film_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "store_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_film_id",
+							"Fields": [
+								"film_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_store_id_film_id",
+							"Fields": [
+								"store_id",
+								"film_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"inventory_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_inventory_film",
+							"Fields": [
+								"film_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "film",
+							"RefFields": [
+								"film_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_inventory_store",
+							"Fields": [
+								"store_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "store",
+							"RefFields": [
+								"store_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "language",
+					"Fields": [
+						{
+							"Name": "language_id",
+							"DBType": "tinyint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "name",
+							"DBType": "char"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "primary",
+							"Fields": [
+								"language_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"Generate": true
+				},
+				{
+					"Name": "payment",
+					"Fields": [
+						{
+							"Name": "payment_id",
+							"DBType": "smallint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "customer_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "staff_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "rental_id",
+							"DBType": "int",
+							"IsNullable": true
+						},
+						{
+							"Name": "amount",
+							"DBType": "decimal"
+						},
+						{
+							"Name": "payment_date",
+							"DBType": "datetime"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp",
+							"IsNullable": true
+						}
+					],
+					"Indices": [
+						{
+							"Name": "fk_payment_rental",
+							"Fields": [
+								"rental_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_customer_id",
+							"Fields": [
+								"customer_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_staff_id",
+							"Fields": [
+								"staff_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"payment_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_payment_customer",
+							"Fields": [
+								"customer_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "customer",
+							"RefFields": [
+								"customer_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_payment_rental",
+							"Fields": [
+								"rental_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "rental",
+							"RefFields": [
+								"rental_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_payment_staff",
+							"Fields": [
+								"staff_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "staff",
+							"RefFields": [
+								"staff_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "rental",
+					"Fields": [
+						{
+							"Name": "rental_id",
+							"DBType": "int",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "rental_date",
+							"DBType": "datetime"
+						},
+						{
+							"Name": "inventory_id",
+							"DBType": "mediumint unsigned"
+						},
+						{
+							"Name": "customer_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "return_date",
+							"DBType": "datetime",
+							"IsNullable": true
+						},
+						{
+							"Name": "staff_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_customer_id",
+							"Fields": [
+								"customer_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_inventory_id",
+							"Fields": [
+								"inventory_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_staff_id",
+							"Fields": [
+								"staff_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"rental_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						},
+						{
+							"Name": "rental_date",
+							"Fields": [
+								"rental_date",
+								"inventory_id",
+								"customer_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_rental_customer",
+							"Fields": [
+								"customer_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "customer",
+							"RefFields": [
+								"customer_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_rental_inventory",
+							"Fields": [
+								"inventory_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "inventory",
+							"RefFields": [
+								"inventory_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_rental_staff",
+							"Fields": [
+								"staff_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "staff",
+							"RefFields": [
+								"staff_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "staff",
+					"Fields": [
+						{
+							"Name": "staff_id",
+							"DBType": "tinyint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "first_name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "last_name",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "address_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "picture",
+							"DBType": "blob",
+							"IsNullable": true
+						},
+						{
+							"Name": "email",
+							"DBType": "varchar",
+							"IsNullable": true
+						},
+						{
+							"Name": "store_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "active",
+							"DBType": "tinyint(1)"
+						},
+						{
+							"Name": "username",
+							"DBType": "varchar"
+						},
+						{
+							"Name": "password",
+							"DBType": "varchar",
+							"IsNullable": true
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_address_id",
+							"Fields": [
+								"address_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_fk_store_id",
+							"Fields": [
+								"store_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"staff_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_staff_address",
+							"Fields": [
+								"address_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "address",
+							"RefFields": [
+								"address_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_staff_store",
+							"Fields": [
+								"store_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "store",
+							"RefFields": [
+								"store_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				},
+				{
+					"Name": "store",
+					"Fields": [
+						{
+							"Name": "store_id",
+							"DBType": "tinyint unsigned",
+							"IsAutoincrement": true,
+							"IsPrimaryKey": true
+						},
+						{
+							"Name": "manager_staff_id",
+							"DBType": "tinyint unsigned"
+						},
+						{
+							"Name": "address_id",
+							"DBType": "smallint unsigned"
+						},
+						{
+							"Name": "last_update",
+							"DBType": "timestamp"
+						}
+					],
+					"Indices": [
+						{
+							"Name": "idx_fk_address_id",
+							"Fields": [
+								"address_id"
+							],
+							"Generate": true
+						},
+						{
+							"Name": "idx_unique_manager",
+							"Fields": [
+								"manager_staff_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						},
+						{
+							"Name": "primary",
+							"Fields": [
+								"store_id"
+							],
+							"IsUnique": true,
+							"Generate": true
+						}
+					],
+					"Ignores": {},
+					"ForeignKeys": [
+						{
+							"Name": "fk_store_address",
+							"Fields": [
+								"address_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "address",
+							"RefFields": [
+								"address_id"
+							],
+							"IsUnique": true
+						},
+						{
+							"Name": "fk_store_staff",
+							"Fields": [
+								"manager_staff_id"
+							],
+							"RefSchema": "sakila",
+							"RefTable": "staff",
+							"RefFields": [
+								"staff_id"
+							],
+							"IsUnique": true
+						}
+					],
+					"Generate": true
+				}
+			],
+			"NoTests": true
+		}
+	],
+	"Database": {
+		"DSN": "root:k4nb4n@tcp(localhost:13306)/?parseTime=true",
+		"Schemas": [
+			"sakila"
+		]
+	}
+}

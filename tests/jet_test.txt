@@ -1,0 +1,107 @@
+package tests
+
+import (
+	"testing"
+
+	"github.com/seambiz/carta/tests/jet/sakila/model"
+	. "github.com/seambiz/carta/tests/jet/sakila/table"
+	"github.com/stretchr/testify/require"
+)
+
+func TestJoinQueryStruct(t *testing.T) {
+	expectedSQL := `
+SELECT film_actor.actor_id AS "film_actor.actor_id",
+     film_actor.film_id AS "film_actor.film_id",
+     film_actor.last_update AS "film_actor.last_update",
+     film.film_id AS "film.film_id",
+     film.title AS "film.title",
+     film.description AS "film.description",
+     film.release_year AS "film.release_year",
+     film.language_id AS "film.language_id",
+     film.original_language_id AS "film.original_language_id",
+     film.rental_duration AS "film.rental_duration",
+     film.rental_rate AS "film.rental_rate",
+     film.length AS "film.length",
+     film.replacement_cost AS "film.replacement_cost",
+     film.rating AS "film.rating",
+     film.special_features AS "film.special_features",
+     film.last_update AS "film.last_update",
+     language.language_id AS "language.language_id",
+     language.name AS "language.name",
+     language.last_update AS "language.last_update",
+     actor.actor_id AS "actor.actor_id",
+     actor.first_name AS "actor.first_name",
+     actor.last_name AS "actor.last_name",
+     actor.last_update AS "actor.last_update",
+     inventory.inventory_id AS "inventory.inventory_id",
+     inventory.film_id AS "inventory.film_id",
+     inventory.store_id AS "inventory.store_id",
+     inventory.last_update AS "inventory.last_update",
+     rental.rental_id AS "rental.rental_id",
+     rental.rental_date AS "rental.rental_date",
+     rental.inventory_id AS "rental.inventory_id",
+     rental.customer_id AS "rental.customer_id",
+     rental.return_date AS "rental.return_date",
+     rental.staff_id AS "rental.staff_id",
+     rental.last_update AS "rental.last_update"
+FROM dvds.language
+     INNER JOIN dvds.film ON (film.language_id = language.language_id)
+     INNER JOIN dvds.film_actor ON (film_actor.film_id = film.film_id)
+     INNER JOIN dvds.actor ON (actor.actor_id = film_actor.actor_id)
+     LEFT JOIN dvds.inventory ON (inventory.film_id = film.film_id)
+     LEFT JOIN dvds.rental ON (rental.inventory_id = inventory.inventory_id)
+ORDER BY language.language_id ASC, film.film_id ASC, actor.actor_id ASC, inventory.inventory_id ASC, rental.rental_id ASC
+LIMIT ?;
+`
+	for i := 0; i < 2; i++ {
+
+		query := Language.
+			INNER_JOIN(Film, Film.LanguageID.EQ(Language.LanguageID)).
+			INNER_JOIN(FilmActor, FilmActor.FilmID.EQ(Film.FilmID)).
+			INNER_JOIN(Actor, Actor.ActorID.EQ(FilmActor.ActorID)).
+			LEFT_JOIN(Inventory, Inventory.FilmID.EQ(Film.FilmID)).
+			LEFT_JOIN(Rental, Rental.InventoryID.EQ(Inventory.InventoryID)).
+			SELECT(
+				FilmActor.AllColumns,
+				Film.AllColumns,
+				Language.AllColumns,
+				Actor.AllColumns,
+				Inventory.AllColumns,
+				Rental.AllColumns,
+			).
+			ORDER_BY(
+				Language.LanguageID.ASC(),
+				Film.FilmID.ASC(),
+				Actor.ActorID.ASC(),
+				Inventory.InventoryID.ASC(),
+				Rental.RentalID.ASC(),
+			).
+			LIMIT(1000)
+
+		testutils.AssertStatementSql(t, query, expectedSQL, int64(1000))
+
+		var dest []struct {
+			model.Language
+
+			Films []struct {
+				model.Film
+
+				Actors []struct {
+					model.Actor
+				}
+
+				Inventories *[]struct {
+					model.Inventory
+
+					Rentals *[]model.Rental
+				}
+			}
+		}
+
+		err := query.Query(db, &dest)
+
+		require.NoError(t, err)
+		// testutils.SaveJsonFile(dest, "./mysql/testdata/lang_film_actor_inventory_rental.json")
+		testutils.AssertJSONFile(t, dest, "./testdata/results/mysql/lang_film_actor_inventory_rental.json")
+	}
+}
